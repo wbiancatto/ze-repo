@@ -1,27 +1,62 @@
 Projeto de segurança Zé Connect
 
-Armazenamento de dados em Buckets criptografados
-Comunicação feita através de API Gateways
-Apenas ALBs expostos para internet
-Toda camada de aplicação recebendo apenas conexões dos ALBs
-WAF controlando a comunicação
-Direcionamento de todos os logs CloudTrail para um Bucket Central em uma conta específica
-Ativação do Inspector em todos as EC2 para avaliação e redução da exposição do ambiente mantendo melhores práticas de segurança 
-Anonimização de dados sensíveis em ambientes de Teste/Hom (utilizando de ferramentas de mercado)
-Utilização de DLP para seguirmos as políticas de segurança de dados previamente definidas
+Arquitetura
 
-Para conscientização das equipes se faz necessário um plano de comunicação contínuo onde podemos envolver e-mails, worshops, talks...
-Utilizando sempre de modelos reais de como a manipulação insegura da informação pode prejudicar a marca visualmente/financeiramente, criar treinamentos,
-welcome kits, entre outros, reforçando sempre as práticas de segurança adotadas pelo Zé, para que sempre tenhamos nossos colaboradores cientes e atentos.
-Periodicamente podemos efetuar a validação com phishings e engenharia social por exemplo.
+Contas AWS: 
+ze-org
+    Todas as contas são concentradas abaixo desta conta, ze-org trata-se da conta master que contém as informações de billing
+ze-prod
+    Todo ambiente de produção encontra-se dentro desta conta, esta possui acessos seguimentados para desenvolvedores, data team, devops e segurança
+ze-hom
+    Réplica do ambiente de produção com dados anonimizados, conta com a finalidade de homologação de novas funcionalidades e esteira de desenvolvimento seguro.
+ze-lab
+    Conta com acesso liberado a todos os times operacionais para desenvolvimento de testes, PoCs entre outros (esta conta não possui comunicação com ambientes
+    prod/hom
+ze-segurity
+    Conta que consolida todos os eventos CloudTrail das demais contas, é a conta de referencia para integração com solução de logging (SIEM), e possui todas as
+    aplicações utilizadas pelo time de segurança para garantir a integridade de todo ambiente
+ze-access
+    Conta para consolidação de federação de acessos e VPNs
 
-Um processo de CI/CD bem estruturado com uma squad dedicada para testes de penetração em novas aplicações e/ou funcionalidades do App, tendo assim uma esteira
-de desenvolvimento seguro, após a aprovação da squad a aplicação e/ou funcionalidade segue para a branch master/prod.
-Podemos também utilizar de ferramentas de SAST/DAST para análise de código, desta forma já mitigamos na esteira por exemplo OWASP top 10.
+Cross Account
+    O relacionamento de cross account parte sempre da conta ze-access para as demais contas baseando-se em RoleAccess e permissões seguimentadas.
+    Desta forma podemos garantir que o colaborador tem acesso apenas a conta que de fato precisa, seu acesso já segue seguimentado apenas com permissões
+    de fato necessárias para seu dia-a-dia, partindo sempre do princípio mais restritivo garantindo que não haja impacto negativo para a operação diária.
+    
+Arquitetura para aplicação
+    Armazenamento de dados em Buckets criptografados e com acesso baseado em roles
+    Comunicação feita através de API Gateways com chaves controladas por cofre externo
+    Apenas ALBs expostos para internet com certificados digitais SSL/TLS 1.2 ou superior.
+    Toda camada de aplicação recebendo apenas conexões dos ALBs
+    IDS/Anti-DDoS/WAF controlando a comunicação
+    Direcionamento de todos os logs CloudTrail para um Bucket Central em uma conta específica para que possa ser integrado a solução de logging (SIEM) e
+    monitoramento de segurança.
+    Ativação do Inspector em todos as EC2 ou containers para avaliação e redução da exposição do ambiente mantendo melhores práticas de segurança 
+    Anonimização de dados sensíveis em ambientes de Teste/Hom (utilizando de ferramentas de mercado)
+    Utilização de DLP para seguirmos as políticas de segurança de dados previamente definidas
 
-Ter uma política de baseline de segurança para ser utilizada como base em todo novo provisionamento, após a política de baseline aprovada, utilizar de sistemas
-para garantir o enforcement destas. Devemos evitar especialmente os tópicos da OWASP Top 10 a nível de desenvolvimento, garantir que nenhum endpoint esteja exposto
-para internet, todos os ALBs estejam atrás do WAF, Federação de acessos dos colaboradores + utilização de 2FA, segregar contas de acordo com projetos ou modelo
-pré definidos pelo negócio, liberação de acesso exclusivamente a roles permitindo o switchrole para o grupo que necessita de acesso utilizando cross account,
-reduzir para 0 ou perto disso o número de usuários IAM dando sempre preferencia para instance profile e roles de acesso, dentro das VPCs que as subnets utilizem
-princípios mais restritivos onde aceitam a comunicação de uma Subnet/SG exclusivo liberando acesso apenas as portas necessárias.
+Processo de conscientização
+    Para conscientização das equipes se faz necessário um plano de comunicação contínuo onde podemos envolver e-mails, worshops, talks, etc.
+    Utilizar sempre de modelos reais de como a manipulação insegura da informação pode prejudicar a marca visualmente/financeiramente, criar treinamentos,
+    welcome kits, entre outros, reforçando sempre as práticas de segurança adotadas pelo Zé, para que sempre tenhamos nossos colaboradores cientes e atentos.
+    Periodicamente podemos efetuar a validação com phishings e engenharia social por exemplo.
+
+Processo de desenvolvimento seguro
+    Um processo de CI/CD bem estruturado com uma squad dedicada para testes de penetração em novas aplicações e/ou funcionalidades do App, tendo assim uma
+    esteira de desenvolvimento seguro, após a aprovação da squad a aplicação e/ou funcionalidade segue para a branch master/prod.
+    Podemos também utilizar de ferramentas de SAST/DAST para análise de código, desta forma já mitigamos na esteira por exemplo OWASP top 10.
+
+Processo para evitar danos
+    Ter uma política de baseline de segurança para ser utilizada como base em todo novo provisionamento, após a política de baseline aprovada, utilizar de
+    sistemas para garantir o enforcement destas. Devemos evitar especialmente os tópicos da OWASP Top 10 a nível de desenvolvimento, garantir que nenhum
+    endpoint esteja exposto para internet, todos os ALBs estejam atrás do WAF, Federação de acessos dos colaboradores + utilização de 2FA, segregar contas de
+    acordo com projetos ou modelo pré definidos pelo negócio, liberação de acesso exclusivamente a roles permitindo o SwitchRole para o grupo que necessita de
+    acesso utilizando Cross Account, reduzir para 0 ou perto disso o número de usuários IAM dando sempre preferencia para instance profile e roles de acesso,
+    dentro das VPCs garantir que as subnets utilizem princípios mais restritivos onde aceitem a comunicação de uma Subnet/SG exclusivo liberando acesso apenas
+    as portas necessárias.
+    
+Para os casos infelizes
+    Um dos tipos de consultas/gatilhos (queries/triggers) que devem adicionados ao SIEM é a detecção da ingestão de dados pessoais (PIIs) baseados em dicionários
+    ou mesmo campos como RG e CPF. Ao ser detectado, um alerta deve ser enviado tanto ao time de segurança quanto aos responsáveis pela privacidade para que um
+    incidente seja criado. Os PIIs devem ser anonimizados ou removidos, aplicação corrigida além do tratamento junto aos times para garantir que este tipo de
+    informação confidencial seja tratada da forma correta.
