@@ -12,7 +12,7 @@ ze-hom
 ze-lab
     Conta com acesso liberado a todos os times operacionais para desenvolvimento de testes, PoCs entre outros (esta conta não possui comunicação com ambientes
     prod/hom
-ze-segurity
+ze-security
     Conta que consolida todos os eventos CloudTrail das demais contas, é a conta de referencia para integração com solução de logging (SIEM), e possui todas as
     aplicações utilizadas pelo time de segurança para garantir a integridade de todo ambiente
 ze-access
@@ -28,6 +28,7 @@ Arquitetura para aplicação
     Comunicação feita através de API Gateways com chaves controladas por cofre externo
     Apenas ALBs expostos para internet com certificados digitais SSL/TLS 1.2 ou superior.
     Toda camada de aplicação recebendo apenas conexões dos ALBs
+    Servidores de banco de dados são acessados apenas pelos servidores de aplicação utilizando role/instance profile
     IDS/Anti-DDoS/WAF controlando a comunicação
     Direcionamento de todos os logs CloudTrail para um Bucket Central em uma conta específica para que possa ser integrado a solução de logging (SIEM) e
     monitoramento de segurança.
