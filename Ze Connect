@@ -1,0 +1,27 @@
+Projeto de segurança Zé Connect
+
+Armazenamento de dados em Buckets criptografados
+Comunicação feita através de API Gateways
+Apenas ALBs expostos para internet
+Toda camada de aplicação recebendo apenas conexões dos ALBs
+WAF controlando a comunicação
+Direcionamento de todos os logs CloudTrail para um Bucket Central em uma conta específica
+Ativação do Inspector em todos as EC2 para avaliação e redução da exposição do ambiente mantendo melhores práticas de segurança 
+Anonimização de dados sensíveis em ambientes de Teste/Hom (utilizando de ferramentas de mercado)
+Utilização de DLP para seguirmos as políticas de segurança de dados previamente definidas
+
+Para conscientização das equipes se faz necessário um plano de comunicação contínuo onde podemos envolver e-mails, worshops, talks...
+Utilizando sempre de modelos reais de como a manipulação insegura da informação pode prejudicar a marca visualmente/financeiramente, criar treinamentos,
+welcome kits, entre outros, reforçando sempre as práticas de segurança adotadas pelo Zé, para que sempre tenhamos nossos colaboradores cientes e atentos.
+Periodicamente podemos efetuar a validação com phishings e engenharia social por exemplo.
+
+Um processo de CI/CD bem estruturado com uma squad dedicada para testes de penetração em novas aplicações e/ou funcionalidades do App, tendo assim uma esteira
+de desenvolvimento seguro, após a aprovação da squad a aplicação e/ou funcionalidade segue para a branch master/prod.
+Podemos também utilizar de ferramentas de SAST/DAST para análise de código, desta forma já mitigamos na esteira por exemplo OWASP top 10.
+
+Ter uma política de baseline de segurança para ser utilizada como base em todo novo provisionamento, após a política de baseline aprovada, utilizar de sistemas
+para garantir o enforcement destas. Devemos evitar especialmente os tópicos da OWASP Top 10 a nível de desenvolvimento, garantir que nenhum endpoint esteja exposto
+para internet, todos os ALBs estejam atrás do WAF, Federação de acessos dos colaboradores + utilização de 2FA, segregar contas de acordo com projetos ou modelo
+pré definidos pelo negócio, liberação de acesso exclusivamente a roles permitindo o switchrole para o grupo que necessita de acesso utilizando cross account,
+reduzir para 0 ou perto disso o número de usuários IAM dando sempre preferencia para instance profile e roles de acesso, dentro das VPCs que as subnets utilizem
+princípios mais restritivos onde aceitam a comunicação de uma Subnet/SG exclusivo liberando acesso apenas as portas necessárias.
